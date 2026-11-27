@@ -2,8 +2,8 @@
 HairCam Mirror — free iPhone-to-iPad live haircut mirror
 
 WHAT IT DOES
-- iPhone uses its rear camera and generates a 12-character private connection code.
-- iPad connects to that camera, shows live video, mirror flip, and zoom.
+- iPhone uses its front/ rear camera and generates a 12-character private connection code.
+- iPad connects to that camera, shows live video, mirror flip, flashlight, and zoom.
 - There is no subscription, microphone capture, recording, or account in the app.
 - Built with WebRTC and the free PeerJS Cloud for signaling (the initial connection handshake).
 
