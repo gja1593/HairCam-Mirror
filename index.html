@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10161d">
+  <meta name="description" content="A free iPhone-to-iPad camera mirror for cutting your own hair.">
+  <title>HairCam Mirror — Free Live Haircut Camera</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #10161d; color: #eef4f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100dvh; background: radial-gradient(ellipse at 70% 0%, #1a3039, #10161d 58%); }
+    .app { width: min(860px, 100%); margin: auto; padding: max(22px, env(safe-area-inset-top)) 20px max(30px, env(safe-area-inset-bottom)); }
+    .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+    .logo { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 13px; background: #234c54; font-size: 25px; }
+    h1 { font-size: 25px; letter-spacing: -.7px; margin: 0; }
+    .sub { color: #a9bec8; font-size: 13px; margin: 3px 0 0; }
+    .panel { background: #19242c; border: 1px solid #33444d; border-radius: 17px; padding: 19px; margin-bottom: 17px; }
+    .intro { font-size: 15px; line-height: 1.5; color: #c8d8e0; margin-top: 0; }
+    .choose { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { cursor: pointer; font: inherit; touch-action: manipulation; }
+    button:disabled { cursor: wait; opacity: .55; }
+    .choice { text-align: left; padding: 19px; background: #233740; border: 1px solid #47616a; color: #edf4f7; border-radius: 13px; }
+    .choice .emoji { display: block; font-size: 28px; margin-bottom: 9px; }
+    .choice strong { display: block; font-size: 16px; margin-bottom: 5px; }
+    .choice span:last-child { font-size: 13px; color: #b8cad3; }
+    .choice:hover, .choice:focus-visible { border-color: #83dcdd; outline: none; }
+    .hidden { display: none !important; }
+    .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+    h2 { font-size: 20px; margin: 0; }
+    .text-btn { border: 0; background: transparent; color: #a4e0df; text-decoration: underline; font-size: 13px; padding: 4px 0; }
+    .stage { position: relative; overflow: hidden; border-radius: 13px; background: #090f13; aspect-ratio: 4 / 3; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+    .stage video { width: 100%; height: 100%; object-fit: contain; transform-origin: center; }
+    .stage .placeholder { position: absolute; color: #8fa6af; text-align: center; padding: 20px; font-size: 14px; pointer-events: none; }
+    .stage.active .placeholder { display: none; }
+    .stage.fill { aspect-ratio: auto; height: min(78dvh, 780px); }
+    .stage.fill video { object-fit: contain; }
+    .status { display: flex; align-items: flex-start; gap: 8px; background: #22323b; border: 1px solid #37505c; border-radius: 11px; padding: 11px 13px; color: #cfdee4; font-size: 13px; line-height: 1.5; margin-bottom: 13px; }
+    .status .dot { width: 8px; height: 8px; border-radius: 100%; flex: none; background: #e2b36b; margin-top: 5px; }
+    .status.ok .dot { background: #61db9f; }
+    .status.err .dot { background: #fb8383; }
+    .primary { border: none; background: #8ed9d6; color: #10232a; padding: 13px 18px; font-weight: 750; border-radius: 11px; min-height: 46px; }
+    .secondary { border: 1px solid #53717b; background: #283d47; color: #eaf4f7; padding: 12px 15px; border-radius: 11px; min-height: 44px; }
+    .danger { border: 1px solid #6b4650; color: #ffd2d5; background: #4b2b34; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .code { letter-spacing: 2px; font-weight: 750; color: #d4fffb; font-size: 25px; overflow-wrap: anywhere; margin: 8px 0 13px; }
+    .hint { color: #abc0cb; line-height: 1.5; font-size: 13px; margin: 10px 0; }
+    .label { display: block; color: #d1e1e8; font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+    input[type=text] { width: 100%; border-radius: 11px; border: 1px solid #58707d; padding: 13px; font-size: 20px; letter-spacing: 1.5px; color: #fff; background: #0f1c23; text-transform: uppercase; margin-bottom: 12px; }
+    input[type=range] { width: 100%; accent-color: #8ed9d6; }
+    .controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .control-cluster { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .zoom { flex: 1 1 160px; max-width: 300px; }
+    .zoom label { display: flex; justify-content: space-between; color: #d4e3e9; font-size: 13px; margin-bottom: 6px; }
+    .notice { font-size: 12px; color: #9db4bf; line-height: 1.5; margin: 14px 1px 0; }
+    footer { font-size: 12px; color: #879faa; line-height: 1.6; padding: 6px 2px; }
+    @media (max-width: 440px) { .app { padding-left: 13px; padding-right: 13px; } .panel { padding: 14px; } .choose { gap: 9px; } .choice { padding: 13px; } .choice strong { font-size: 14px; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="brand"><div class="logo" aria-hidden="true">✂️</div><div><h1>HairCam Mirror</h1><p class="sub">Your phone is the camera. Your tablet is the mirror.</p></div></div>
+
+  <section class="panel" id="chooser">
+    <p class="intro">Use your <strong>iPhone behind your head</strong> and your <strong>iPad in front of you</strong>. Start on the iPhone first, then connect from the iPad.</p>
+    <div class="choose">
+      <button class="choice" id="chooseCamera"><span class="emoji">📱</span><strong>Use as camera</strong><span>Choose on your iPhone</span></button>
+      <button class="choice" id="chooseViewer"><span class="emoji">🪞</span><strong>Use as mirror</strong><span>Choose on your iPad</span></button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="cameraPanel">
+    <div class="title-row"><h2>iPhone · Camera</h2><button class="text-btn" id="backCamera">Change device</button></div>
+    <div class="stage" id="cameraStage"><video id="cameraVideo" muted autoplay playsinline webkit-playsinline></video><div class="placeholder">Your camera preview appears here.</div></div>
+    <div class="status" id="cameraStatus" role="status" aria-live="polite"><span class="dot"></span><span id="cameraStatusText">Tap Start Camera and allow camera access.</span></div>
+    <div id="cameraStart"><button class="primary" id="startCamera">Start camera</button></div>
+    <div id="cameraLive" class="hidden">
+      <span class="label">Connection code for your iPad</span><div class="code" id="roomDisplay">—</div>
+      <div class="button-row"><button class="secondary" id="shareLink">Share viewing link</button><button class="secondary" id="copyLink">Copy viewing link</button><button class="secondary danger" id="stopCamera">Stop camera</button></div>
+      <p class="hint">On your iPad, open the same webpage, choose <strong>Use as mirror</strong>, and enter this code—or open the viewing link shared from your iPhone. Keep this iPhone unlocked and this page visible.</p>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="viewerPanel">
+    <div class="title-row"><h2>iPad · Live Mirror</h2><button class="text-btn" id="backViewer">Change device</button></div>
+    <div id="viewerStart">
+      <label for="roomInput" class="label">Enter the code shown on the iPhone</label>
+      <input type="text" id="roomInput" placeholder="Example: K7M3N9R4T2B8" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="button-row"><button class="primary" id="connectViewer">Connect to iPhone</button></div>
+      <p class="hint">Both devices need an internet connection for the initial handshake. Using the same Wi-Fi is recommended.</p>
+    </div>
+    <div class="stage" id="viewerStage"><video id="viewerVideo" muted autoplay playsinline webkit-playsinline></video><div class="placeholder">Your live haircut mirror appears here.</div></div>
+    <div class="status" id="viewerStatus" role="status" aria-live="polite"><span class="dot"></span><span id="viewerStatusText">Enter your camera's code to start.</span></div>
+    <div class="controls">
+      <div class="control-cluster"><button class="secondary" id="mirrorButton" aria-pressed="true">Mirror: ON</button><button class="secondary" id="expandButton">Larger view</button></div>
+      <div class="zoom"><label for="zoomSlider"><span>Zoom</span><output id="zoomValue">1.0×</output></label><input id="zoomSlider" type="range" min="1" max="2.5" step="0.1" value="1"></div>
+    </div>
+    <div class="button-row" style="margin-top:13px"><button class="secondary danger hidden" id="disconnectViewer">Disconnect</button></div>
+    <p class="hint">If your movements look backward, toggle Mirror. This app streams video only—there is no audio or recording.</p>
+  </section>
+  <footer>Free, no account, no subscription. Encrypted WebRTC video; free PeerJS Cloud is used for connection setup. No cloud video storage. The camera needs HTTPS and your permission. Keep both screens awake during use.</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const roomPattern = /^[A-HJ-NP-Z2-9]{12}$/;
+  let peer = null, stream = null, mediaCall = null, dataConn = null, room = '', role = null, isMirrored = true, zoom = 1;
+
+  function freshCode() {
+    const random = new Uint8Array(12);
+    crypto.getRandomValues(random);
+    return Array.from(random, n => alphabet[n % alphabet.length]).join('');
+  }
+  function status(which, message, type = '') {
+    $(which + 'StatusText').textContent = message;
+    $(which + 'Status').className = 'status' + (type ? ' ' + type : '');
+  }
+  function showRole(next) {
+    role = next;
+    $('chooser').classList.toggle('hidden', next !== null);
+    $('cameraPanel').classList.toggle('hidden', next !== 'camera');
+    $('viewerPanel').classList.toggle('hidden', next !== 'viewer');
+    if (next === 'viewer') setTimeout(() => $('roomInput').focus(), 80);
+  }
+  function cleanup() {
+    if (mediaCall) { try { mediaCall.close(); } catch (_) {} mediaCall = null; }
+    if (dataConn) { try { dataConn.close(); } catch (_) {} dataConn = null; }
+    if (peer) { try { peer.destroy(); } catch (_) {} peer = null; }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    $('cameraVideo').srcObject = null;
+    $('viewerVideo').srcObject = null;
+    $('cameraStage').classList.remove('active');
+    $('viewerStage').classList.remove('active');
+  }
+  function peerError(error, which) {
+    const name = error?.type || error?.name || 'error';
+    const explanation = name === 'peer-unavailable'
+      ? 'Camera not found. Confirm the iPhone camera is running and the code is correct.'
+      : name === 'unavailable-id'
+      ? 'This camera code is already in use. Stop and restart to generate a new one.'
+      : name === 'network' || name === 'socket-error' || name === 'server-error'
+      ? 'Connection server unavailable. Check internet access and try again.'
+      : (error?.message || String(error));
+    status(which, explanation, 'err');
+  }
+
+  async function startCamera() {
+    $('startCamera').disabled = true;
+    status('camera', 'Requesting rear camera permission…');
+    if (!window.Peer) {
+      status('camera', 'Could not load the connection library. Check your internet connection and reload.', 'err');
+      $('startCamera').disabled = false; return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      status('camera', 'Camera access requires Safari on an HTTPS webpage. Publish this file to GitHub Pages first.', 'err');
+      $('startCamera').disabled = false; return;
+    }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } },
+        audio: false
+      });
+      $('cameraVideo').srcObject = stream;
+      $('cameraStage').classList.add('active');
+      await $('cameraVideo').play().catch(() => {});
+      room = freshCode();
+      $('roomDisplay').textContent = room;
+      peer = new Peer('haircam-' + room.toLowerCase());
+      peer.on('open', () => {
+        $('cameraLive').classList.remove('hidden'); $('cameraStart').classList.add('hidden');
+        status('camera', 'Camera is on. Open the viewing link on your iPad.', 'ok');
+      });
+      peer.on('connection', conn => {
+        dataConn = conn;
+        conn.on('open', () => {
+          status('camera', 'iPad connected. Sending live camera video…', 'ok');
+          if (mediaCall) mediaCall.close();
+          mediaCall = peer.call(conn.peer, stream);
+          if (!mediaCall) { status('camera', 'Could not initiate video. Reconnect from iPad.', 'err'); return; }
+          mediaCall.on('close', () => status('camera', 'iPad video connection ended. Camera is still on.'));
+          mediaCall.on('error', e => peerError(e, 'camera'));
+        });
+        conn.on('close', () => status('camera', 'iPad disconnected. Waiting for another connection.'));
+        conn.on('error', e => peerError(e, 'camera'));
+      });
+      peer.on('error', e => peerError(e, 'camera'));
+      peer.on('disconnected', () => status('camera', 'Connection service disconnected. Keep the page open and check internet access.', 'err'));
+    } catch (e) {
+      cleanup();
+      status('camera', e?.name === 'NotAllowedError' ? 'Camera permission was denied. Allow camera access in Safari settings and retry.' : 'Could not start camera: ' + (e?.message || String(e)), 'err');
+    } finally { $('startCamera').disabled = false; }
+  }
+  function stopCamera() {
+    cleanup();
+    $('cameraLive').classList.add('hidden'); $('cameraStart').classList.remove('hidden');
+    status('camera', 'Camera is off. Tap Start Camera to begin again.');
+  }
+  function viewingUrl() {
+    const url = new URL(location.href);
+    url.searchParams.set('role', 'viewer');
+    url.searchParams.set('room', room);
+    return url.toString();
+  }
+  async function shareLink() {
+    const url = viewingUrl();
+    if (navigator.share) {
+      try { await navigator.share({ title: 'HairCam Mirror', text: 'Open this on the iPad to see my camera:', url }); return; }
+      catch (e) { if (e?.name === 'AbortError') return; }
+    }
+    await copyLink();
+  }
+  async function copyLink() {
+    try { await navigator.clipboard.writeText(viewingUrl()); status('camera', 'Viewing link copied. Send it to your iPad.', 'ok'); }
+    catch (_) { status('camera', 'Copy failed. Enter the connection code on your iPad instead.'); }
+  }
+  function connectViewer() {
+    const chosen = $('roomInput').value.toUpperCase().replace(/[^A-Z2-9]/g, '');
+    if (!roomPattern.test(chosen)) { status('viewer', 'Enter the full 12-character code from your iPhone.', 'err'); return; }
+    if (!window.Peer) { status('viewer', 'Could not load the connection library. Check internet access and reload.', 'err'); return; }
+    cleanup();
+    $('connectViewer').disabled = true;
+    $('viewerStart').classList.add('hidden');
+    $('disconnectViewer').classList.remove('hidden');
+    status('viewer', 'Connecting to the iPhone…');
+    peer = new Peer();
+    peer.on('call', call => {
+      mediaCall = call;
+      call.on('stream', async incoming => {
+        $('viewerVideo').srcObject = incoming;
+        $('viewerStage').classList.add('active');
+        try { await $('viewerVideo').play(); status('viewer', 'Live camera connected. Adjust Mirror or Zoom as needed.', 'ok'); }
+        catch (_) { status('viewer', 'Video received, but playback was blocked. Tap the video or reconnect.', 'err'); }
+      });
+      call.on('close', () => { $('viewerVideo').srcObject = null; $('viewerStage').classList.remove('active'); status('viewer', 'Video ended. Reconnect to resume.'); });
+      call.on('error', e => peerError(e, 'viewer'));
+      call.answer(); // One-way video: the iPad does not send its camera or microphone.
+    });
+    peer.on('open', () => {
+      dataConn = peer.connect('haircam-' + chosen.toLowerCase(), { reliable: true });
+      dataConn.on('open', () => status('viewer', 'Connected to iPhone. Waiting for video…', 'ok'));
+      dataConn.on('error', e => peerError(e, 'viewer'));
+      dataConn.on('close', () => status('viewer', 'iPhone disconnected. Tap Disconnect then reconnect.', 'err'));
+    });
+    peer.on('error', e => peerError(e, 'viewer'));
+    peer.on('disconnected', () => status('viewer', 'Connection service disconnected. Check internet access.', 'err'));
+  }
+  function disconnectViewer() {
+    cleanup();
+    $('connectViewer').disabled = false;
+    $('viewerStart').classList.remove('hidden');
+    $('disconnectViewer').classList.add('hidden');
+    status('viewer', 'Disconnected. You can reconnect using the same code.');
+  }
+  function updateView() {
+    $('viewerVideo').style.transform = `${isMirrored ? 'scaleX(-1) ' : ''}scale(${zoom})`;
+    $('mirrorButton').textContent = 'Mirror: ' + (isMirrored ? 'ON' : 'OFF');
+    $('mirrorButton').setAttribute('aria-pressed', String(isMirrored));
+    $('zoomValue').textContent = zoom.toFixed(1) + '×';
+  }
+  $('chooseCamera').addEventListener('click', () => showRole('camera'));
+  $('chooseViewer').addEventListener('click', () => showRole('viewer'));
+  $('backCamera').addEventListener('click', () => { stopCamera(); showRole(null); });
+  $('backViewer').addEventListener('click', () => { disconnectViewer(); showRole(null); });
+  $('startCamera').addEventListener('click', startCamera);
+  $('stopCamera').addEventListener('click', stopCamera);
+  $('shareLink').addEventListener('click', shareLink);
+  $('copyLink').addEventListener('click', copyLink);
+  $('connectViewer').addEventListener('click', connectViewer);
+  $('roomInput').addEventListener('keydown', e => { if (e.key === 'Enter') connectViewer(); });
+  $('disconnectViewer').addEventListener('click', disconnectViewer);
+  $('mirrorButton').addEventListener('click', () => { isMirrored = !isMirrored; updateView(); });
+  $('zoomSlider').addEventListener('input', e => { zoom = Number(e.target.value); updateView(); });
+  $('expandButton').addEventListener('click', () => {
+    const bigger = $('viewerStage').classList.toggle('fill');
+    $('expandButton').textContent = bigger ? 'Smaller view' : 'Larger view';
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && role === 'camera' && stream && stream.getVideoTracks().every(t => t.readyState === 'ended')) {
+      status('camera', 'iPhone camera stopped while the page was inactive. Stop and restart the camera.', 'err');
+    }
+  });
+  window.addEventListener('beforeunload', cleanup);
+  updateView();
+  const params = new URLSearchParams(location.search);
+  const incoming = (params.get('room') || '').trim().toUpperCase();
+  if (incoming && roomPattern.test(incoming)) $('roomInput').value = incoming;
+  if (params.get('role') === 'viewer' || incoming) showRole('viewer');
+})();
+</script>
+</body>
+</html>
