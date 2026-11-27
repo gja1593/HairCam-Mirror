@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#10161d">
   <meta name="description" content="A free iPhone-to-iPad camera mirror for cutting your own hair.">
-  <title>HairCam Mirror — Free Live Haircut Camera</title>
+  <title>HairCam Mirror v1.2 — Free Live Haircut Camera</title>
   <style>
     :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #10161d; color: #eef4f8; }
     * { box-sizing: border-box; }
@@ -52,6 +52,19 @@
     .control-cluster { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
     .zoom { flex: 1 1 160px; max-width: 300px; }
     .zoom label { display: flex; justify-content: space-between; color: #d4e3e9; font-size: 13px; margin-bottom: 6px; }
+    .zoom-row { display: flex; align-items: center; gap: 9px; }
+    .zoom-row input { flex: 1; min-width: 70px; }
+    .zoom-step { min-width: 42px; font-size: 19px; line-height: 1; font-weight: 700; padding: 9px 12px; }
+    .camera-switch-row { margin: 14px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .camera-side-label { font-size: 13px; color: #abc0cb; }
+    .light-panel { margin: 14px 0; padding: 12px 14px; border: 1px solid #47616a; border-radius: 12px; background: #142b32; }
+    .light-panel .hint { margin-bottom: 0; }
+    .light-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .fill-overlay { position: fixed; inset: 0; z-index: 100; background: rgb(255,255,255); display: flex; align-items: flex-end; justify-content: center; padding: 20px 16px max(28px, env(safe-area-inset-bottom)); }
+    .fill-tools { width: min(480px, 100%); background: #19242c; color: #fff; border: 1px solid #46606a; border-radius: 17px; padding: 18px; box-shadow: 0 6px 30px #0006; }
+    .fill-tools input[type=range] { margin: 14px 0; }
+    .fill-tools .hint { color: #bed0da; }
+    .fill-tools .button-row { justify-content: space-between; }
     .notice { font-size: 12px; color: #9db4bf; line-height: 1.5; margin: 14px 1px 0; }
     footer { font-size: 12px; color: #879faa; line-height: 1.6; padding: 6px 2px; }
     @media (max-width: 440px) { .app { padding-left: 13px; padding-right: 13px; } .panel { padding: 14px; } .choose { gap: 9px; } .choice { padding: 13px; } .choice strong { font-size: 14px; } }
@@ -59,7 +72,7 @@
 </head>
 <body>
 <div class="app">
-  <div class="brand"><div class="logo" aria-hidden="true">✂️</div><div><h1>HairCam Mirror</h1><p class="sub">Your phone is the camera. Your tablet is the mirror.</p></div></div>
+  <div class="brand"><div class="logo" aria-hidden="true">✂️</div><div><h1>HairCam Mirror</h1><p class="sub">Your phone is the camera. Your tablet is the mirror. <strong>v1.2</strong></p></div></div>
 
   <section class="panel" id="chooser">
     <p class="intro">Use your <strong>iPhone behind your head</strong> and your <strong>iPad in front of you</strong>. Start on the iPhone first, then connect from the iPad.</p>
@@ -76,6 +89,9 @@
     <div id="cameraStart"><button class="primary" id="startCamera">Start camera</button></div>
     <div id="cameraLive" class="hidden">
       <span class="label">Connection code for your iPad</span><div class="code" id="roomDisplay">—</div>
+      <div class="camera-switch-row"><button class="secondary" id="switchCamera">Switch to front camera</button><span class="camera-side-label" id="activeCamera">Using rear camera</span></div>
+      <div class="light-panel" id="torchPanel"><div class="light-buttons"><button class="secondary" id="torchButton">💡 Turn flashlight on</button><span class="camera-side-label" id="torchStatus">Rear LED flashlight · on/off only</span></div><p class="hint">Safari can attempt to switch the rear LED on and off, but cannot set its physical brightness level. Results depend on your iPhone and Safari version.</p></div>
+      <div class="light-panel hidden" id="fillPanel"><button class="secondary" id="openFill">☀️ Dimmable selfie screen light</button><p class="hint">Uses your iPhone screen as a white light for the front camera; it does not dim the LED flashlight.</p></div>
       <div class="button-row"><button class="secondary" id="shareLink">Share viewing link</button><button class="secondary" id="copyLink">Copy viewing link</button><button class="secondary danger" id="stopCamera">Stop camera</button></div>
       <p class="hint">On your iPad, open the same webpage, choose <strong>Use as mirror</strong>, and enter this code—or open the viewing link shared from your iPhone. Keep this iPhone unlocked and this page visible.</p>
     </div>
@@ -93,12 +109,21 @@
     <div class="status" id="viewerStatus" role="status" aria-live="polite"><span class="dot"></span><span id="viewerStatusText">Enter your camera's code to start.</span></div>
     <div class="controls">
       <div class="control-cluster"><button class="secondary" id="mirrorButton" aria-pressed="true">Mirror: ON</button><button class="secondary" id="expandButton">Larger view</button></div>
-      <div class="zoom"><label for="zoomSlider"><span>Zoom</span><output id="zoomValue">1.0×</output></label><input id="zoomSlider" type="range" min="1" max="2.5" step="0.1" value="1"></div>
+      <div class="zoom"><label for="zoomSlider"><span>Zoom on mirror screen</span><output id="zoomValue">1.0×</output></label><div class="zoom-row"><button class="secondary zoom-step" id="zoomOut" aria-label="Zoom out">−</button><input id="zoomSlider" type="range" min="1" max="2.5" step="0.1" value="1"><button class="secondary zoom-step" id="zoomIn" aria-label="Zoom in">+</button></div></div>
     </div>
     <div class="button-row" style="margin-top:13px"><button class="secondary danger hidden" id="disconnectViewer">Disconnect</button></div>
     <p class="hint">If your movements look backward, toggle Mirror. This app streams video only—there is no audio or recording.</p>
   </section>
   <footer>Free, no account, no subscription. Encrypted WebRTC video; free PeerJS Cloud is used for connection setup. No cloud video storage. The camera needs HTTPS and your permission. Keep both screens awake during use.</footer>
+</div>
+<div id="screenFillOverlay" class="fill-overlay hidden" role="dialog" aria-modal="true" aria-label="Selfie screen light">
+  <div class="fill-tools">
+    <strong>☀️ Screen fill light</strong>
+    <div class="zoom"><label for="fillSlider"><span>Light level</span><output id="fillValue">100%</output></label></div>
+    <input type="range" id="fillSlider" min="5" max="100" step="1" value="100" aria-label="Screen light level">
+    <div class="button-row"><button class="primary" id="closeFill">Done / Return to camera</button></div>
+    <p class="hint">Adjusts the white/gray on-screen glow. Your iPhone's system screen brightness also affects the light.</p>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 <script>
@@ -108,6 +133,7 @@
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const roomPattern = /^[A-HJ-NP-Z2-9]{12}$/;
   let peer = null, stream = null, mediaCall = null, dataConn = null, room = '', role = null, isMirrored = true, zoom = 1;
+  let cameraFacing = 'environment', cameraSwitching = false, torchOn = false;
 
   function freshCode() {
     const random = new Uint8Array(12);
@@ -130,6 +156,8 @@
     if (dataConn) { try { dataConn.close(); } catch (_) {} dataConn = null; }
     if (peer) { try { peer.destroy(); } catch (_) {} peer = null; }
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    torchOn = false;
+    closeFill();
     $('cameraVideo').srcObject = null;
     $('viewerVideo').srcObject = null;
     $('cameraStage').classList.remove('active');
@@ -147,6 +175,119 @@
     status(which, explanation, 'err');
   }
 
+  function cameraConstraints(facing, exact = false) {
+    return {
+      video: {
+        facingMode: exact ? { exact: facing } : { ideal: facing },
+        width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 }
+      },
+      audio: false
+    };
+  }
+  function refreshLightControls() {
+    const isFront = cameraFacing === 'user';
+    $('torchPanel').classList.toggle('hidden', isFront);
+    $('fillPanel').classList.toggle('hidden', !isFront);
+    torchOn = false;
+    $('torchButton').textContent = '💡 Turn flashlight on';
+    $('torchButton').disabled = false;
+    $('torchStatus').textContent = 'Rear LED flashlight · on/off only';
+  }
+  async function toggleTorch() {
+    const track = stream?.getVideoTracks()[0];
+    if (!track || cameraFacing !== 'environment') return;
+    const wanted = !torchOn;
+    $('torchButton').disabled = true;
+    try {
+      // The Web Media Capture API exposes torch as a boolean, not an LED intensity.
+      await track.applyConstraints({advanced: [{torch: wanted}]});
+      torchOn = wanted;
+      $('torchButton').textContent = wanted ? '💡 Turn flashlight off' : '💡 Turn flashlight on';
+      $('torchStatus').textContent = wanted ? 'Light requested ON' : 'Light requested OFF';
+      if (wanted) status('camera', 'Flashlight enabled if supported by this iPhone. If the LED stays dark, Safari did not honor the request.', 'ok');
+    } catch (e) {
+      $('torchStatus').textContent = 'Flashlight unavailable in this browser/camera';
+      status('camera', 'This iPhone/Safari camera did not allow web flashlight control. Try the screen light with the front camera instead.', 'err');
+    } finally { $('torchButton').disabled = false; }
+  }
+  function updateFill() {
+    const value = Number($('fillSlider').value);
+    const channel = Math.round(35 + (220 * value / 100));
+    $('screenFillOverlay').style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+    $('fillValue').textContent = value + '%';
+  }
+  function closeFill() { $('screenFillOverlay').classList.add('hidden'); }
+  function openFill() {
+    if (!stream || cameraFacing !== 'user') return;
+    $('screenFillOverlay').classList.remove('hidden');
+    updateFill();
+  }
+  function showCameraFacing() {
+    const isFront = cameraFacing === 'user';
+    $('activeCamera').textContent = isFront ? 'Using front camera' : 'Using rear camera';
+    $('switchCamera').textContent = isFront ? 'Switch to rear camera' : 'Switch to front camera';
+    refreshLightControls();
+  }
+  function callViewerFromCamera() {
+    if (!peer || peer.destroyed || !dataConn?.open || !stream) return;
+    if (mediaCall) { try { mediaCall.close(); } catch (_) {} mediaCall = null; }
+    const call = peer.call(dataConn.peer, stream);
+    if (!call) { status('camera', 'Could not start video. Reconnect from the mirror.', 'err'); return; }
+    mediaCall = call;
+    call.on('close', () => {
+      if (mediaCall === call) status('camera', 'Mirror video connection ended. Camera is still on.');
+    });
+    call.on('error', e => peerError(e, 'camera'));
+  }
+  async function setCameraStream(nextStream) {
+    // WebRTC track replacement usually updates the viewer without requiring a new code.
+    const sender = mediaCall?.peerConnection?.getSenders().find(s => s.track?.kind === 'video');
+    let replaced = false;
+    if (sender && typeof sender.replaceTrack === 'function') {
+      try { await sender.replaceTrack(nextStream.getVideoTracks()[0]); replaced = true; }
+      catch (_) { /* On some devices, initiate a fresh video call instead. */ }
+    }
+    stream = nextStream;
+    $('cameraVideo').srcObject = stream;
+    $('cameraStage').classList.add('active');
+    await $('cameraVideo').play().catch(() => {});
+    if (!replaced && dataConn?.open) callViewerFromCamera();
+  }
+  async function switchCamera() {
+    if (!stream || cameraSwitching) return;
+    cameraSwitching = true;
+    $('switchCamera').disabled = true;
+    const oldFacing = cameraFacing;
+    const newFacing = oldFacing === 'user' ? 'environment' : 'user';
+    status('camera', 'Switching to ' + (newFacing === 'user' ? 'front' : 'rear') + ' camera…');
+    // Safari often cannot open the other iPhone camera until the old one is released.
+    closeFill();
+    torchOn = false;
+    stream.getTracks().forEach(t => t.stop());
+    try {
+      const next = await navigator.mediaDevices.getUserMedia(cameraConstraints(newFacing, true));
+      await setCameraStream(next);
+      cameraFacing = newFacing;
+      showCameraFacing();
+      status('camera', dataConn?.open ? 'Camera switched. Your mirror should update automatically.' : 'Camera switched. Waiting for a mirror connection.', 'ok');
+    } catch (e) {
+      // If the requested camera is unavailable, restore the previous camera.
+      try {
+        const restored = await navigator.mediaDevices.getUserMedia(cameraConstraints(oldFacing));
+        await setCameraStream(restored);
+        cameraFacing = oldFacing;
+        showCameraFacing();
+        status('camera', 'Could not switch cameras (' + (e?.message || e?.name || 'camera unavailable') + '). Previous camera restored.', 'err');
+      } catch (_) {
+        stopCamera();
+        status('camera', 'Camera switch failed. Tap Start camera to restart.', 'err');
+      }
+    } finally {
+      cameraSwitching = false;
+      $('switchCamera').disabled = false;
+    }
+  }
+
   async function startCamera() {
     $('startCamera').disabled = true;
     status('camera', 'Requesting rear camera permission…');
@@ -159,10 +300,9 @@
       $('startCamera').disabled = false; return;
     }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } },
-        audio: false
-      });
+      cameraFacing = 'environment';
+      stream = await navigator.mediaDevices.getUserMedia(cameraConstraints(cameraFacing));
+      showCameraFacing();
       $('cameraVideo').srcObject = stream;
       $('cameraStage').classList.add('active');
       await $('cameraVideo').play().catch(() => {});
@@ -177,11 +317,7 @@
         dataConn = conn;
         conn.on('open', () => {
           status('camera', 'iPad connected. Sending live camera video…', 'ok');
-          if (mediaCall) mediaCall.close();
-          mediaCall = peer.call(conn.peer, stream);
-          if (!mediaCall) { status('camera', 'Could not initiate video. Reconnect from iPad.', 'err'); return; }
-          mediaCall.on('close', () => status('camera', 'iPad video connection ended. Camera is still on.'));
-          mediaCall.on('error', e => peerError(e, 'camera'));
+          callViewerFromCamera();
         });
         conn.on('close', () => status('camera', 'iPad disconnected. Waiting for another connection.'));
         conn.on('error', e => peerError(e, 'camera'));
@@ -229,12 +365,18 @@
     peer.on('call', call => {
       mediaCall = call;
       call.on('stream', async incoming => {
+        if (mediaCall !== call) return;
         $('viewerVideo').srcObject = incoming;
         $('viewerStage').classList.add('active');
         try { await $('viewerVideo').play(); status('viewer', 'Live camera connected. Adjust Mirror or Zoom as needed.', 'ok'); }
         catch (_) { status('viewer', 'Video received, but playback was blocked. Tap the video or reconnect.', 'err'); }
       });
-      call.on('close', () => { $('viewerVideo').srcObject = null; $('viewerStage').classList.remove('active'); status('viewer', 'Video ended. Reconnect to resume.'); });
+      call.on('close', () => {
+        if (mediaCall !== call) return;
+        $('viewerVideo').srcObject = null;
+        $('viewerStage').classList.remove('active');
+        status('viewer', 'Video ended. Reconnect to resume.');
+      });
       call.on('error', e => peerError(e, 'viewer'));
       call.answer(); // One-way video: the iPad does not send its camera or microphone.
     });
@@ -266,13 +408,25 @@
   $('backViewer').addEventListener('click', () => { disconnectViewer(); showRole(null); });
   $('startCamera').addEventListener('click', startCamera);
   $('stopCamera').addEventListener('click', stopCamera);
+  $('switchCamera').addEventListener('click', switchCamera);
+  $('torchButton').addEventListener('click', toggleTorch);
+  $('openFill').addEventListener('click', openFill);
+  $('closeFill').addEventListener('click', closeFill);
+  $('fillSlider').addEventListener('input', updateFill);
   $('shareLink').addEventListener('click', shareLink);
   $('copyLink').addEventListener('click', copyLink);
   $('connectViewer').addEventListener('click', connectViewer);
   $('roomInput').addEventListener('keydown', e => { if (e.key === 'Enter') connectViewer(); });
   $('disconnectViewer').addEventListener('click', disconnectViewer);
   $('mirrorButton').addEventListener('click', () => { isMirrored = !isMirrored; updateView(); });
-  $('zoomSlider').addEventListener('input', e => { zoom = Number(e.target.value); updateView(); });
+  function setZoom(value) {
+    zoom = Math.max(1, Math.min(2.5, Math.round(value * 10) / 10));
+    $('zoomSlider').value = zoom;
+    updateView();
+  }
+  $('zoomSlider').addEventListener('input', e => setZoom(Number(e.target.value)));
+  $('zoomOut').addEventListener('click', () => setZoom(zoom - 0.1));
+  $('zoomIn').addEventListener('click', () => setZoom(zoom + 0.1));
   $('expandButton').addEventListener('click', () => {
     const bigger = $('viewerStage').classList.toggle('fill');
     $('expandButton').textContent = bigger ? 'Smaller view' : 'Larger view';
@@ -284,6 +438,7 @@
   });
   window.addEventListener('beforeunload', cleanup);
   updateView();
+  updateFill();
   const params = new URLSearchParams(location.search);
   const incoming = (params.get('room') || '').trim().toUpperCase();
   if (incoming && roomPattern.test(incoming)) $('roomInput').value = incoming;
